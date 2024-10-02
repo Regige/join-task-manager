@@ -1,10 +1,26 @@
-const STORAGE_TOKEN = '8A3U4MK7U3QQZFIE9YT3HJC3MLRAQ8J3J7J4DZ5Y';           //The tocken to the server storage
-const STORAGE_URL = 'https://remote-storage.developerakademie.org/item';    //The URL to the server storage
+const STORAGE_URL = "https://join-a9624-default-rtdb.europe-west1.firebasedatabase.app/";
+
+// const STORAGE_TOKEN = '8A3U4MK7U3QQZFIE9YT3HJC3MLRAQ8J3J7J4DZ5Y';           //The tocken to the server storage
+// const STORAGE_URL = 'https://remote-storage.developerakademie.org/item';    //The URL to the server storage
 let user;                                                                   // Creation of users variable
-let list;                                                                   //Creation of list variable
-let contacts;                                                               //Creation of contact variable
+let list = [];                                                                   //Creation of list variable
+let contacts = [];                                                               //Creation of contact variable
 let listString = 'list';                                                    //Creation of liststring variable
 let contactsString = 'contacts';                                            //Creation of contactstring variable
+
+
+async function setItem(path="", data={}) {
+    let response = await fetch(STORAGE_URL + path + ".json", {
+        method: "POST",
+        header: {
+            "Content-Type": "application/json",
+        }, 
+        body: JSON.stringify(data)
+    });
+    // return responseToJson = await response.json();
+    let responseToJson = await response.json();
+    console.log("Gesischertes Objekt: ", responseToJson);
+}
 
 
 /**
@@ -14,10 +30,20 @@ let contactsString = 'contacts';                                            //Cr
  * @param {JSON} value  JSON to key
  * @returns             returns a status
  */
-async function setItem(key, value) {
-    const payload = { key, value, token: STORAGE_TOKEN };
-    return fetch(STORAGE_URL, { method: 'POST', body: JSON.stringify(payload) })
-        .then(res => res.json());
+// async function setItem(key, value) {
+//     const payload = { key, value, token: STORAGE_TOKEN };
+//     return fetch(STORAGE_URL, { method: 'POST', body: JSON.stringify(payload) })
+//         .then(res => res.json());
+// }
+
+
+
+async function getItem(path="") {
+    let response = await fetch(STORAGE_URL + path + ".json")
+    let responseToJson = await response.json();
+    console.log("So sehen die Daten von firebase aus: ", responseToJson);
+    
+    return responseToJson;
 }
 
 
@@ -27,14 +53,14 @@ async function setItem(key, value) {
  * @param {String} key   Key for storing
  * @returns         return a JSON
  */
-async function getItem(key) {
-    const url = `${STORAGE_URL}?key=${key}&token=${STORAGE_TOKEN}`;
-    return fetch(url).then(res => res.json()).then(res => {
-        if (res.data) {
-            return res.data.value;
-        } throw `${key} not found`;
-    });
-}
+// async function getItem(key) {
+//     const url = `${STORAGE_URL}?key=${key}&token=${STORAGE_TOKEN}`;
+//     return fetch(url).then(res => res.json()).then(res => {
+//         if (res.data) {
+//             return res.data.value;
+//         } throw `${key} not found`;
+//     });
+// }
 
 
 /**
@@ -43,8 +69,9 @@ async function getItem(key) {
  * @param {String} users        User
  * @param {String} keyString    key as string
  */
-async function SaveDataInLocalStorageFromServer(users, keyString) {
-    let data = await JSON.parse(await getItem(users + `-${keyString}`));
+async function SaveDataInLocalStorageFromServer(user, keyString) {
+    // let data = await JSON.parse(await getItem(users + `-${keyString}`));
+    let data = await getItem(user + `-${keyString}`);
     let dataAsText = JSON.stringify(data);
     localStorage.setItem(keyString, dataAsText);
 }
@@ -60,7 +87,11 @@ async function SaveDataInLocalStorageFromServer(users, keyString) {
 async function SaveInLocalStorageAndServer(users, keyString, dataObject) {
     let dataAsText = JSON.stringify(dataObject); // variable list or contacts 
     localStorage.setItem(keyString, dataAsText);
-    await setItem(users + `-${keyString}`, dataObject);
+    for (let i = 0; i < dataObject.length; i++) {
+        const sglObject = dataObject[i];
+        
+        await setItem(users + `-${keyString}`, sglObject);
+    }
 }
 
 /**
@@ -71,6 +102,7 @@ function loadFromLocalStorage() {
     if (listAsText) {
         list = JSON.parse(listAsText);
     }
+    console.log("So sieht die liste aus: ", list);
 }
 
 /**

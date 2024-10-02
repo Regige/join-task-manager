@@ -34,7 +34,8 @@ function loadUsersFromLocalStorage() {
  */
 async function loadUsers() {
     try {
-        let parsedUsers = JSON.parse(await getItem('users'));
+        // let parsedUsers = JSON.parse(await getItem('users'));
+        let parsedUsers = await getItem('/users');
         if (Array.isArray(parsedUsers)) {
             users = parsedUsers;
         } else {
@@ -98,12 +99,15 @@ async function processRegistration() {
     let registerBtn = document.getElementById('registerBtn');
 
     registerBtn.disabled = true;
-    users.push({
+    let newUser = {
         name: name.value,
         email: email.value,
         password: password1.value,
-    });
-    await setItem('users', JSON.stringify(users));
+    };
+
+    users.push(newUser);
+    // await setItem('users', JSON.stringify(users));
+    await setItem('/users', newUser);
     await loadStandardUserListAndContacts(email.value, name.value);
     showPopupAndRedirect('You have successfully registered.', 'index.html');
     resetFormValue();
@@ -127,11 +131,22 @@ function resetFormValue() {
  * @returns {Promise<void>}
  */
 async function loadStandardUserListAndContacts(user, name) {
-    let new_list = JSON.parse(await getItem('guest-list'));
-    await setItem(user + '-list', new_list);
-    let new_contact = JSON.parse(await getItem('guest-contacts'));
+    // let new_list = JSON.parse(await getItem('guest-list'));
+    let new_list = await getItem('/guest-list');
+    // await setItem(user + '-list', new_list);
+    for (let i = 0; i < new_list.length; i++) {
+        const task = new_list[i];
+        await setItem('/' + user + '-list', task);
+    }
+
+    // let new_contact = JSON.parse(await getItem('guest-contacts'));
+    let new_contact = await getItem('/guest-contacts');
     addUserToContacts(user, name, new_contact);
-    await setItem(user + '-contacts', new_contact);
+    // await setItem(user + '-contacts', new_contact);
+    for (let i = 0; i < new_contact.length; i++) {
+        const contact = new_contact[i];
+        await setItem('/' + user + '-list', contact);
+    }
 }
 
 /**
