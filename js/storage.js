@@ -12,7 +12,7 @@ let contactsString = 'contacts';                                            //Cr
 async function setItem(path="", data={}) {
     let response = await fetch(STORAGE_URL + path + ".json", {
         method: "POST",
-        header: {
+        headers: {
             "Content-Type": "application/json",
         }, 
         body: JSON.stringify(data)
