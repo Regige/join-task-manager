@@ -67,7 +67,7 @@ async function saveNewTask(taskTitle, taskDescription, assignedTo, dueDate, task
 
     list.push(newTask);
 
-    await SaveInLocalStorageAndServer(user, listString, list);
+    await SaveInLocalStorageAndServer(user, listString, list, newTask);
 }
 
 

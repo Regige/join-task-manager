@@ -65,11 +65,14 @@ function taskBoardEmpty(task, option) {
  * @param {String} task_user    User task of the individual tasks
  */
 function loadBoardUsers(id, task_user) {
-    for (let i = 0; i < task_user.length; i++) {
-        const element = task_user[i];
-        let task_user_number = `task_user${id}`;
-        document.getElementById(task_user_number).innerHTML += createBoardUsers(element.color, element.name);
-    };
+    if(task_user) {
+        let task_userAsArray = Object.values(task_user);
+        for (let i = 0; i < task_userAsArray.length; i++) {
+            const element = task_userAsArray[i];
+            let task_user_number = `task_user${id}`;
+            document.getElementById(task_user_number).innerHTML += createBoardUsers(element.color, element.name);
+        };
+    }
 }
 
 /**
@@ -78,21 +81,24 @@ function loadBoardUsers(id, task_user) {
  * @param {id} id           ID of the task 
  * @param {String} subtasks Sub task of the individual tasks
  */
-function loadBoardSubtasks(id, subtasks) {
-    var element_subtask = 0;
-    var element_percent = 0;
-    let subtask_number = `task_subtask${id}`;
-    for (let i = 0; i < subtasks.length; i++) {
-        const element = subtasks[i];
-        element_subtask = element_subtask + element.completed;
-        element_percent = element.completed + element_percent;
+function loadBoardSubtasks(id, subtasksObject) {
+    if(subtasksObject) {
+        let subtasks = Object.values(subtasksObject);
+        var element_subtask = 0;
+        var element_percent = 0;
+        let subtask_number = `task_subtask${id}`;
+        for (let i = 0; i < subtasks.length; i++) {
+            const element = subtasks[i];
+            element_subtask = element_subtask + element.completed;
+            element_percent = element.completed + element_percent;
+        }
+        if (subtasks.length) {
+            percent = (element_percent / subtasks.length) * 100;
+            document.getElementById(subtask_number).innerHTML = createBoardSubtasks(element_subtask, subtasks.length, percent);
+        } else {
+            document.getElementById(subtask_number).innerHTML = "";
+        };
     }
-    if (subtasks.length) {
-        percent = (element_percent / subtasks.length) * 100;
-        document.getElementById(subtask_number).innerHTML = createBoardSubtasks(element_subtask, subtasks.length, percent);
-    } else {
-        document.getElementById(subtask_number).innerHTML = "";
-    };
 }
 
 /**
@@ -201,18 +207,27 @@ function closeBoardCard() {
  * 
  * @param {Number} id ID for Tasks
  */
-function deleteTask(id) {
+async function deleteTask(id) {
     if (user != 'guest') {
-        for (let i = 0; i < list.length; i++) {
-            const element = list[i];
-            if (id == element.id) {
-                list.splice(i, 1);
+        try {
+            for (let i = 0; i < list.length; i++) {
+                const element = list[i];
+                if (id == element.id) {
+                    let path = user.replace("@", "-").replaceAll(".", "_") + "-list" + "/" + element['key']; 
+                    await deleteItem(path);
+                    list.splice(i, 1);
+
+                    let dataAsText = JSON.stringify(list); 
+                    localStorage.setItem(listString, dataAsText);
+                }
             }
+            // SaveInLocalStorageAndServer(user, listString, list);
+            closeBoardCard();
+            loadTaskBoard();
+            showPopup("Task deleted");
+        } catch (error) {
+            console.error("Fehler beim Löschen der Daten:", error);
         }
-        SaveInLocalStorageAndServer(user, listString, list);
-        closeBoardCard();
-        loadTaskBoard();
-        showPopup("Task deleted");
     } else {
         showPopup('Cannot be deleted as a guest. Please create an account')
     }
