@@ -63,6 +63,33 @@ async function getItem(path="") {
 // }
 
 
+
+async function deleteItem(path) {
+    let response = await fetch(STORAGE_URL + path + ".json", {
+        method: "DELETE",
+    });
+    // return responseToJson = await response.json();
+    let responseToJson = await response.json();
+    console.log("Gesischertes Objekt: ", responseToJson);
+}
+
+
+
+async function putItem(path="", data={}) {
+    let response = await fetch(STORAGE_URL + path + ".json", {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        }, 
+        body: JSON.stringify(data)
+    });
+    // return responseToJson = await response.json();
+    let responseToJson = await response.json();
+    console.log("Gesischertes Objekt: ", responseToJson);
+}
+
+
+
 /**
  * This function saves the user data in the local storage and on the server
  * 
@@ -71,8 +98,14 @@ async function getItem(path="") {
  */
 async function SaveDataInLocalStorageFromServer(user, keyString) {
     // let data = await JSON.parse(await getItem(users + `-${keyString}`));
-    let data = await getItem(user + `-${keyString}`);
-    let dataAsText = JSON.stringify(data);
+    let path = user.replace("@", "-").replaceAll(".", "_");
+    let data = await getItem(path + `-${keyString}`);
+    // let dataAsArray = Object.values(data);
+    let dataWithKeys = Object.entries(data).map(([key, value]) => {
+        return { ...value, key: key };
+    });
+
+    let dataAsText = JSON.stringify(dataWithKeys);
     localStorage.setItem(keyString, dataAsText);
 }
 
@@ -84,15 +117,22 @@ async function SaveDataInLocalStorageFromServer(user, keyString) {
  * @param {String} keyString    key as string
  * @param {String} dataObject   dataobject as string
  */
-async function SaveInLocalStorageAndServer(users, keyString, dataObject) {
-    let dataAsText = JSON.stringify(dataObject); // variable list or contacts 
-    localStorage.setItem(keyString, dataAsText);
-    for (let i = 0; i < dataObject.length; i++) {
-        const sglObject = dataObject[i];
+async function SaveInLocalStorageAndServer(user, keyString, dataObject, sglObject) {
+    try {
+        let path = user.replace("@", "-").replaceAll(".", "_")
+        let dataAsText = JSON.stringify(dataObject); // variable list or contacts 
+        localStorage.setItem(keyString, dataAsText);
+        // for (let i = 0; i < dataObject.length; i++) {
+        //     const sglObject = dataObject[i];
         
-        await setItem(users + `-${keyString}`, sglObject);
+        //     await setItem(user + `-${keyString}`, sglObject);
+        // }
+        await setItem(path + `-${keyString}`, sglObject);
+    } catch (error) {
+        console.error("Fehler beim Speichern der Daten:", error);
     }
 }
+
 
 /**
  * This function loads the tasks data

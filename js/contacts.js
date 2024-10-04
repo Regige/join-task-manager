@@ -58,7 +58,7 @@ async function saveNewContactValues(contactNameAlterd, contactEmail, contactPhon
     };
 
     contacts.push(newContact);
-    await SaveInLocalStorageAndServer(user, contactsString, contacts);
+    await SaveInLocalStorageAndServer(user, contactsString, contacts, newContact);
 }
 
 /**
@@ -139,14 +139,26 @@ async function deleteContacts(i) {
         }
         closeNewContacts();
     } else {
-    deleteFromList(i);
-    contacts.splice(i,1);
+        try {
+            let path = user.replace("@", "-").replaceAll(".", "_") + "-contacts" + "/" + contacts[i]['key']; 
+            await deleteItem(path);
 
-    await SaveInLocalStorageAndServer(user, contactsString, contacts);
-    renderContacts();
-    closeNewContacts();
-    removeFromMainPage();
-    showPopup('Contact deleted');
+            deleteFromList(i);
+            contacts.splice(i,1);
+
+            let dataAsText = JSON.stringify(contacts); 
+            localStorage.setItem(contactsString, dataAsText);
+
+            // await SaveInLocalStorageAndServer(user, contactsString, contacts);
+            renderContacts();
+            removeFromMainPage();
+            showPopup('Contact deleted');
+
+        } catch (error) {
+            console.error("Fehler beim Löschen der Daten:", error);
+        }
+
+        closeNewContacts();
     }
 }
 
@@ -235,19 +247,19 @@ async function saveChangedContact(i) {
  */
 
 async function saveChangedContactFunctions(i) {
-    let contactName = document.getElementById('popup-contact-name');
-    let contactEmail = document.getElementById('popup-contact-email');
-    let contactPhone = document.getElementById('popup-contact-phone');
-    let contactNameAlterd = contactName.value.charAt(0).toUpperCase() + contactName.value.slice(1)
-    let logogram = getLogogram(contactNameAlterd);
-    let contactColor = getContactColor();
+        let contactName = document.getElementById('popup-contact-name');
+        let contactEmail = document.getElementById('popup-contact-email');
+        let contactPhone = document.getElementById('popup-contact-phone');
+        let contactNameAlterd = contactName.value.charAt(0).toUpperCase() + contactName.value.slice(1)
+        let logogram = getLogogram(contactNameAlterd);
+        let contactColor = getContactColor();
 
-    await saveContactValues(i, contactEmail, contactPhone, contactNameAlterd, logogram, contactColor);
-    renderContacts();
-    resetForm(contactName, contactEmail, contactPhone);
-    closeNewContacts();
-    showContact(i);
-    showPopup('Contact changed');
+        await saveContactValues(i, contactEmail, contactPhone, contactNameAlterd, logogram, contactColor);
+        renderContacts();
+        resetForm(contactName, contactEmail, contactPhone);
+        closeNewContacts();
+        showContact(i);
+        showPopup('Contact changed');
 }
 
 /**
@@ -264,14 +276,24 @@ async function saveChangedContactFunctions(i) {
  */
 
 async function saveContactValues(i, contactEmail, contactPhone, contactNameAlterd, logogram, contactColor) {
-    let newContact = {
-        'name': contactNameAlterd,
-        'email': contactEmail.value,
-        'phone': contactPhone.value,
-        'logogram': logogram,
-        'hex_color': contactColor
-    };
+    try {
+        let newContact = {
+            'name': contactNameAlterd,
+            'email': contactEmail.value,
+            'phone': contactPhone.value,
+            'logogram': logogram,
+            'hex_color': contactColor
+        };
 
-    contacts.splice(i, 1, newContact);
-    await SaveInLocalStorageAndServer(user, contactsString, contacts);
+        let path = user.replace("@", "-").replaceAll(".", "_") + "-contacts" + "/" + contacts[i]['key']; 
+        await putItem(path, newContact);
+
+        contacts.splice(i, 1, newContact);
+        let dataAsText = JSON.stringify(contacts); 
+        localStorage.setItem(contactsString, dataAsText);
+        // await SaveInLocalStorageAndServer(user, contactsString, contacts);
+
+    } catch (error) {
+        console.error("Fehler beim Ändern der Daten:", error);
+    }
 }

@@ -13,7 +13,6 @@ async function login() {
     if (user) {
         saveUserinLocalStorge(user.email,user.name);
         window.location.href = './html/summary.html';
-
     } else {
         showPopup('Email and/or password are incorrect.');
     }
