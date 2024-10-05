@@ -460,6 +460,7 @@ async function changeTask(id, i) {
  */
 
 async function saveChangedTask(id, i, taskTitle, taskDescription, assignedTo, dueDate, taskCategory, taskBoard) {
+    try {
         let changedTask = {
         'id':id,
         'headline': taskTitle,
@@ -470,10 +471,18 @@ async function saveChangedTask(id, i, taskTitle, taskDescription, assignedTo, du
         'category': taskCategory,
         'subtasks': subtasks,
         'task_board': taskBoard,
-    }
+        }
 
-    list.splice(i, 1, changedTask);
-    await SaveInLocalStorageAndServer(user, listString, list);
+        let path = user.replace("@", "-").replaceAll(".", "_") + "-list" + "/" + list[i]['key']; 
+        await putItem(path, changedTask);
+
+        list.splice(i, 1, changedTask);
+        let dataAsText = JSON.stringify(list); 
+        localStorage.setItem(listString, dataAsText);
+        // await SaveInLocalStorageAndServer(user, listString, list);
+    } catch (error) {
+        console.error("Fehler beim Ändern der Daten:", error);
+    }
 }
 
 /**

@@ -124,10 +124,20 @@ function allowDrop(event) {
  * 
  * @param {String} category Submission of the task as a string
  */
-function moveTo(category) {
+async function moveTo(category) {
     let index = list.findIndex((task) => task.id === draggedElement);
     list[index]['task_board'] = category;
-    SaveInLocalStorageAndServer(user, 'list', list);
+    try {
+        let path = user.replace("@", "-").replaceAll(".", "_") + "-list" + "/" + list[index]['key']; 
+        await putItem(path, list[index]);
+
+        let dataAsText = JSON.stringify(list); 
+        localStorage.setItem(listString, dataAsText);
+
+        // SaveInLocalStorageAndServer(user, 'list', list);
+    } catch (error) {
+        console.error("Fehler beim Ändern der Daten:", error);
+    }
     initBoard();
 }
 
