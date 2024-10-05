@@ -107,6 +107,7 @@ async function processRegistration() {
         email: email.value,
         password: password1.value,
     };
+    
 
     users.push(newUser);
     // await setItem('users', JSON.stringify(users));
