@@ -49,16 +49,26 @@ async function saveNewContact() {
  */
 
 async function saveNewContactValues(contactNameAlterd, contactEmail, contactPhone, logogram, contactColor) {
-    let newContact = {
-        'name': contactNameAlterd,
-        'email': contactEmail.value,
-        'phone': contactPhone.value,
-        'logogram': logogram,
-        'hex_color': contactColor
-    };
+    try {
 
-    contacts.push(newContact);
-    await SaveInLocalStorageAndServer(user, contactsString, contacts, newContact);
+        let newContact = {
+            'name': contactNameAlterd,
+            'email': contactEmail.value,
+            'phone': contactPhone.value,
+            'logogram': logogram,
+            'hex_color': contactColor
+        };
+
+        // await SaveInLocalStorageAndServer(user, contactsString, contacts, newContact);
+        let path = user.replace("@", "-").replaceAll(".", "_");
+        let savedKey = await setItem(path + `-${contactsString}`, newContact);
+
+        newContact.key = savedKey;
+        contacts.push(newContact);
+
+    } catch (error) {
+        console.error("Fehler beim Speichern der Daten:", error);
+    }
 }
 
 /**

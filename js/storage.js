@@ -20,6 +20,8 @@ async function setItem(path="", data={}) {
     // return responseToJson = await response.json();
     let responseToJson = await response.json();
     console.log("Gesischertes Objekt: ", responseToJson);
+
+    return responseToJson.name;
 }
 
 
@@ -119,15 +121,18 @@ async function SaveDataInLocalStorageFromServer(user, keyString) {
  */
 async function SaveInLocalStorageAndServer(user, keyString, dataObject, sglObject) {
     try {
-        let path = user.replace("@", "-").replaceAll(".", "_")
-        let dataAsText = JSON.stringify(dataObject); // variable list or contacts 
-        localStorage.setItem(keyString, dataAsText);
+        let path = user.replace("@", "-").replaceAll(".", "_");
         // for (let i = 0; i < dataObject.length; i++) {
-        //     const sglObject = dataObject[i];
-        
-        //     await setItem(user + `-${keyString}`, sglObject);
-        // }
-        await setItem(path + `-${keyString}`, sglObject);
+            //     const sglObject = dataObject[i];
+            
+            //     await setItem(user + `-${keyString}`, sglObject);
+            // }
+            let savedKey = await setItem(path + `-${keyString}`, sglObject);
+            sglObject.key = savedKey;
+         // hier muss das Array objekt noch mal angepasst werden
+
+            let dataAsText = JSON.stringify(dataObject); // variable list or contacts 
+            localStorage.setItem(keyString, dataAsText);
     } catch (error) {
         console.error("Fehler beim Speichern der Daten:", error);
     }

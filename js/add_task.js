@@ -53,21 +53,32 @@ async function defineNewTask() {
  */
 
 async function saveNewTask(taskTitle, taskDescription, assignedTo, dueDate, taskCategory, idIndex, taskBoard) {
-    let newTask = {
-        'id':idIndex,
-        'headline': taskTitle.value,
-        'text': taskDescription.value,
-        'task_user': assignedTo,
-        'date': dueDate.value,
-        'priority': taskPrio,
-        'category': taskCategory,
-        'subtasks': subtasks,
-        'task_board': taskBoard,
+    try {
+        let newTask = {
+            'id':idIndex,
+            'headline': taskTitle.value,
+            'text': taskDescription.value,
+            'task_user': assignedTo,
+            'date': dueDate.value,
+            'priority': taskPrio,
+            'category': taskCategory,
+            'subtasks': subtasks,
+            'task_board': taskBoard,
+        }
+        // await SaveInLocalStorageAndServer(user, listString, list, newTask);
+
+        let path = user.replace("@", "-").replaceAll(".", "_");
+        let savedKey = await setItem(path + `-${listString}`, newTask);
+        newTask.key = savedKey;
+
+        list.push(newTask);
+
+        let dataAsText = JSON.stringify(list);
+        localStorage.setItem(listString, dataAsText);
+
+    } catch (error) {
+        console.error("Fehler beim Speichern der Daten:", error);
     }
-
-    list.push(newTask);
-
-    await SaveInLocalStorageAndServer(user, listString, list, newTask);
 }
 
 

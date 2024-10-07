@@ -332,12 +332,28 @@ function createBordCardSubtasks(id, subtasks) {
  * @param {*} i       ID of the Subtask
  * @param {*} status  status of the individual task
  */
-function toggelSubtaskCompleted(id, i, status) {
-    if (status == 1) {
-        list[id].subtasks[i].completed = 0;
-    } else {
-        list[id].subtasks[i].completed = 1;
+async function toggelSubtaskCompleted(id, i, status) {
+    let index = list.findIndex(item => item.id === id);
+    if (index === -1) {
+        console.error("Kein Objekt mit der ID gefunden:", id);
+        return;
     }
-    createBordCardSubtasks(id, list[id]['subtasks'])
-    SaveInLocalStorageAndServer(user, listString, list);
+    if (status == 1) {
+        list[index].subtasks[i].completed = 0;
+    } else {
+        list[index].subtasks[i].completed = 1;
+    }
+    createBordCardSubtasks(id, list[index]['subtasks']);
+    try {
+        let path = user.replace("@", "-").replaceAll(".", "_");
+        await putItem(path + `-${listString}` + `/${list[index].key}` , list[index]);
+
+        let dataAsText = JSON.stringify(list);
+        localStorage.setItem(listString, dataAsText);
+
+        // SaveInLocalStorageAndServer(user, listString, list);
+
+    } catch (error) {
+        console.error("Fehler beim Ändern der Daten:", error);
+    }
 }
