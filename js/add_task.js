@@ -482,6 +482,7 @@ async function saveChangedTask(id, i, taskTitle, taskDescription, assignedTo, du
         'category': taskCategory,
         'subtasks': subtasks,
         'task_board': taskBoard,
+        'key': list[i].key
         }
 
         let path = user.replace("@", "-").replaceAll(".", "_") + "-list" + "/" + list[i]['key']; 
