@@ -65,6 +65,8 @@ async function saveNewContactValues(contactNameAlterd, contactEmail, contactPhon
 
         newContact.key = savedKey;
         contacts.push(newContact);
+        let dataAsText = JSON.stringify(contacts);
+        localStorage.setItem(contactsString, dataAsText);
 
     } catch (error) {
         console.error("Fehler beim Speichern der Daten:", error);
@@ -191,14 +193,18 @@ function deleteFromList(i) {
     let contactName = contacts[i]['name'];
 
     for (let j = 0; j < list.length; j++) {
-        const task = list[j];
-        const users = task['task_user'];
+        let task = list[j];
+        if(task['task_user']) {
+            let users = task['task_user'];
 
-        for (let k = 0; k < users.length; k++) {
-            const user = users[k];
-            
-            if(user['full_name'] === contactName) {
-                changeUsersInTask(users, k, task, j);
+            users = Object.values(users);
+
+            for (let k = 0; k < users.length; k++) {
+                const user = users[k];
+                
+                if(user['full_name'] === contactName) {
+                    changeUsersInTask(users, k, task, j);
+                }
             }
         }
     }
@@ -292,7 +298,8 @@ async function saveContactValues(i, contactEmail, contactPhone, contactNameAlter
             'email': contactEmail.value,
             'phone': contactPhone.value,
             'logogram': logogram,
-            'hex_color': contactColor
+            'hex_color': contactColor,
+            'key': contacts[i]['key']
         };
 
         let path = user.replace("@", "-").replaceAll(".", "_") + "-contacts" + "/" + contacts[i]['key']; 

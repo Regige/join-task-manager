@@ -89,12 +89,28 @@ function touchMove(elem,startX,startY){
  * @param {String} elem element of the touch object
  */
 
-function touchEnd(elem){
-    elem.addEventListener('touchend', eve => {
-            checkTouchEnd(elem);
-            SaveInLocalStorageAndServer(user, 'list', list);
-            loadTaskBoard();
-            console.log(elem)
+async function touchEnd(elem){
+    elem.addEventListener('touchend', async (eve) => {
+            let index = list.findIndex(item => item.id === elem.id);
+            if (index === -1) {
+                console.error("Kein Objekt mit der ID gefunden:", id);
+                return;
+            } else {
+                try {
+                    checkTouchEnd(elem, index);
+                    // SaveInLocalStorageAndServer(user, 'list', list);
+                    let path = user.replace("@", "-").replaceAll(".", "_") + "-list" + "/" + elem['key']; 
+                    await putItem(path, elem);
+
+                    let dataAsText = JSON.stringify(list); 
+                    localStorage.setItem(listString, dataAsText);
+
+                    loadTaskBoard();
+                    console.log(elem)
+                } catch (error) {
+                    console.error("Fehler beim Ändern der Daten:", error);
+                }
+            }
         });
 }
 
@@ -144,21 +160,21 @@ function touchHighlight() {
  * 
  * @param {String} elem The elmenet which is to be filed
  */
-function checkTouchEnd(elem) {
+function checkTouchEnd(elem, i) {
     if (ist_position >= toDo_top && ist_position <= toDo_buttom) {
-        list[elem.id].task_board = 'to_do';
+        list[i].task_board = 'to_do';
         removeHighlight('board_to_do');
     }
     if (ist_position >= inProgress_top && ist_position <= inProgress_buttom) {
-        list[elem.id].task_board = 'in_progress';
+        list[i].task_board = 'in_progress';
         removeHighlight('board_in_progress');
     }
     if (ist_position >= awaitFeedback_top && ist_position <= awaitFeedback_buttom) {
-        list[elem.id].task_board = 'await_feedback';
+        list[i].task_board = 'await_feedback';
         removeHighlight('board_await_feedback');
     }
     if (ist_position >= done_top && ist_position <= done_buttom) {
-        list[elem.id].task_board = 'done';
+        list[i].task_board = 'done';
         removeHighlight('board_done');
     }
 }
